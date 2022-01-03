@@ -1,0 +1,45 @@
+name: CD
+
+on:
+  release:
+    types: [created]
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+          - arch: x86
+          - arch: armhf
+          - arch: arm64
+    name: Build on ${{ matrix.arch }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Docker
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+      - name: Build
+        run: |
+          docker run --workdir /github/workspace --rm --entrypoint "./build_static_alpine.sh" -v "$(pwd)":"/github/workspace" multiarch/alpine:${{ matrix.arch }}-v3.14
+
+      - name: Upload Binary
+        if: github.event_name != 'release'
+        uses: actions/upload-artifact@v2
+        with:
+          name: dpitunnel-cli-${{ matrix.arch }}
+          path: build/DPITunnel-cli-exec
+
+      - name: Upload Binary to Release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@2.2.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/DPITunnel-cli-exec
+          asset_name: dpitunnel-cli-${{ matrix.arch }}
+          tag: ${{ github.ref }}

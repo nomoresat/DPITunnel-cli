@@ -18,9 +18,7 @@
 #include <dnslib/message.h>
 #include <dnslib/rr.h>
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-
-#include <cpp-httplib/httplib.h>
+#include "cpp-httplib/httplib.h"
 
 #include <base64.h>
 

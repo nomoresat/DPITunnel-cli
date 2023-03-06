@@ -1,11 +1,11 @@
 # Set the minimum version of CMake that can be used
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.18)
 
 set(CMAKE_CXX_STANDARD 14)
 cmake_policy(SET CMP0065 NEW)
 
 if (STATIC_BINARY)
-    message("Building static portable binary with small size")
+    message(STATUS "Building static portable binary with small size")
 endif ()
 
 
@@ -14,7 +14,6 @@ project(DPITunnel-cli)
 
 # Add dependencies
 add_subdirectory(RawSocket)
-add_subdirectory(cpp-httplib)
 add_subdirectory(dnslib)
 add_subdirectory(libnl)
 
@@ -44,7 +43,6 @@ target_include_directories(DPITunnel-cli-exec
         PRIVATE
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/RawSocket/include
-        ${PROJECT_SOURCE_DIR}/cpp-httplib/include
         ${PROJECT_SOURCE_DIR}/dnslib/include
         ${PROJECT_SOURCE_DIR}/libnl/include
         )
@@ -55,11 +53,18 @@ find_package(Threads REQUIRED)
 if (STATIC_BINARY)
     set(OPENSSL_USE_STATIC_LIBS TRUE)
 endif ()
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL REQUIRED COMPONENTS SSL Crypto)
+
+# Add httplib (cpp-httplib)
+find_package(httplib 0.12.0 COMPONENTS OpenSSL ZLIB Brotli)
+if (NOT HTTPLIB_FOUND)
+    add_subdirectory(cpp-httplib)
+    message(STATUS "Using bundled httplib")
+endif()
 
 target_link_libraries(DPITunnel-cli-exec
         RawSocket
-        cpp-httplib
+        httplib::httplib
         dnslib
         libnl
         Threads::Threads

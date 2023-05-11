@@ -113,9 +113,10 @@ enum eRDataType {
     RDATA_TXT = 16,
     // IPv6 address
     RDATA_AAAA = 28,
+    // service record specifies
+    RDATA_SRV = 33,
     // naming authority pointer
     RDATA_NAPTR = 35,
-    RDATA_SRV = 0x0021,
     RDATA_A6 = 0x0026,
     RDATA_OPT = 0x0029,
     RDATA_ANY = 0x00ff

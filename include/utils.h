@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
 
 bool wildcard_match(char const *needle, char const *haystack);

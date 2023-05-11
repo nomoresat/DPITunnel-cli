@@ -432,6 +432,39 @@ std::string RDataNAPTR::asString()
     return text.str();
 }
 
+/////////// RDataSRV /////////////////
+void RDataSRV::decode(Buffer &buffer, const uint size)
+{
+    mPriority = buffer.get16bits();
+    mWeight = buffer.get16bits();
+    mPort = buffer.get16bits();
+
+    mTarget.clear();
+    uint posStart = buffer.getPos();
+    while (buffer.getPos() - posStart < size - 6) {
+        mTarget.append(buffer.getDnsCharacterString());
+        mTarget.append(".");
+    }
+    mTarget.pop_back();
+    mTarget.pop_back();
+}
+
+void RDataSRV::encode(Buffer &buffer)
+{
+    buffer.put16bits(mPriority);
+    buffer.put16bits(mWeight);
+    buffer.put16bits(mPort);
+    buffer.putDnsCharacterString(mTarget);
+}
+
+std::string RDataSRV::asString()
+{
+    ostringstream text;
+    text << "mPriority: " << mPriority << ", mWeight: " << mWeight << ", mPort: " << mPort << ", mTarget: " << mTarget << std::endl;
+    return text.str();
+}
+
+
 /////////// ResourceRecord ////////////
 
 ResourceRecord::~ResourceRecord()
@@ -500,6 +533,9 @@ void ResourceRecord::decode(Buffer &buffer)
                 break;
             case RDATA_NAPTR:
                 mRData = new RDataNAPTR();
+                break;
+            case RDATA_SRV:
+                mRData = new RDataSRV();
                 break;
             default:
                 mRData = new RDataNULL();
